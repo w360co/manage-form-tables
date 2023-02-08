@@ -1,5 +1,5 @@
 /**
- * TableManagerForm
+ * ManageFormTables
  *
  *  jQuery plugin for manager tables from
  *
@@ -19,10 +19,10 @@
      * @type {string}
      * @private
      */
-    const pluginFnName = 'tableManagerForm';
+    const pluginFnName = 'manageFormTables';
 
 
-    class TableManagerForm {
+    class ManageFormTables {
 
         /**
          * Initialize the target element and extend the default options with the
@@ -47,14 +47,14 @@
          * @private
          */
         _init() {
-            this._buildTableManagerForm();
+            this._buildManageFormTables();
         }
 
         /**
          * Build the alert and populate it if all checks are passed.
          * @private
          */
-        _buildTableManagerForm() {
+        _buildManageFormTables() {
 
              const _this = this;
 
@@ -303,7 +303,7 @@
      * Initialize this plugin for each instanced element.
      *
      * @example
-     * $('#tableId').bootstrapTableForm({
+     * $('#tableId').manageFormTables({
      *    templateRow: `
      *                <tr role="row">
      *                   <td role="cell">
@@ -330,7 +330,7 @@
     $.fn[pluginFnName] = function(config) {
         if (typeof config === 'object') {
             return this.each(function(i, target) {
-                new TableManagerForm(this, config);
+                new ManageFormTables(this, config);
             });
         } else {
             console.error(pluginFnName + ': invalid options.');
@@ -342,7 +342,7 @@
      * Each element can be externally overridden.
      *
      * @example
-     * $.fn.bootstrapTableForm.defaults.type = 'danger';
+     * $.fn.manageFormTables.defaults.type = 'danger';
      *
      * @type {object}
      * @public
