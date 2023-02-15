@@ -10,7 +10,7 @@
 
 'use strict';
 
-(function($, window, document, undefined) {
+(function ($, window, document, undefined) {
 
     /**
      * This plugin's name. Used for namespacing,
@@ -39,6 +39,8 @@
             this.logs = [];
             this._init();
             this._show();
+            this.tableIndexRow = 1;
+
         }
 
         /**
@@ -56,7 +58,7 @@
          */
         _buildManageFormTables() {
 
-             const _this = this;
+            const _this = this;
 
             _this._configValidationEngine();
 
@@ -110,8 +112,8 @@
             }
 
             let hasEvents = true;
-            if($.isArray( _this.settings.events )) {
-                $.each(_this.settings.events, function(i, event) {
+            if ($.isArray(_this.settings.events)) {
+                $.each(_this.settings.events, function (i, event) {
                     if (!_this._isValidFunction(event.onEvent)) {
                         hasEvents = false;
                         _this._log('no onEvent function provided', 'warn');
@@ -127,58 +129,75 @@
                 });
             }
 
+            let formTitle = '';
+            if (_this._isValidString(_this.settings.tableFormTitle) && _this.settings.tableFormTitle !== '') {
+                formTitle = _this.settings.tableFormTitle;
+            }
+
             const $form = _this.element.closest('form');
+            _this.element.addClass('manage-table-form');
             $(_this.settings.senderTarget).hide();
             $(_this.settings.addRowTarget, _this.element).on('click', function () {
-                if(hasAddRow && hasTemplateRow) {
+                if (hasAddRow && hasTemplateRow) {
                     const $currentRowClone = $(_this.settings.templateRow).appendTo(_this.element);
+                    const formTitleData = $currentRowClone.closest("table").data('title');
+                    if (_this._isValidString(formTitleData) && formTitleData !== '') {
+                        formTitle = formTitleData;
+                    }
+                    if (formTitle !== '') {
+                        $currentRowClone.html(function (i, html) {
+                            return html.replace(_this.settings.indexRowPattern, formTitle + ' No. ' + _this.tableIndexRow);
+                        });
+                    }
 
-                    if(hasSender) {
+                    _this.tableIndexRow++;
+
+                    if (hasSender) {
                         $(_this.settings.senderTarget).show();
                     }
 
-                    if(hasRemoveRow) {
+                    if (hasRemoveRow) {
                         $(_this.settings.removeRowTarget, $currentRowClone).on('click', function () {
-                            if(hasMinRowsVisible) {
-                                const trIndex = $(this).closest("tbody").find('tr').length;
+                            const trIndex = $(this).closest("tbody").find('tr').length;
+                            if (hasMinRowsVisible) {
                                 if (trIndex > _this.settings.minRowsVisible) {
                                     $(this).closest("tr").remove();
                                 } else {
                                     if (hasOnErrorRowsVisible) {
                                         _this.settings.onErrorRowsVisible(_this.element, $form);
-                                        _this._log('It is not allowed to delete rows less than '+_this.settings.minRowsVisible, 'error');
+                                        _this._log('It is not allowed to delete rows less than ' + _this.settings.minRowsVisible, 'error');
                                     }
                                 }
                                 if (trIndex <= 0) {
                                     $(_this.settings.senderTarget).hide();
                                 }
-                            }else{
+                            } else {
                                 $(this).closest("tr").remove();
                             }
                         });
                     }
 
-                    if(hasEvents){
-                        $.each(_this.settings.events, function(i, event) {
+                    if (hasEvents) {
+                        $.each(_this.settings.events, function (i, event) {
                             $(event.targetName, $currentRowClone).on(event.onEventName, event.onEvent);
                         });
                     }
 
                     return false;
                 }
-             });
+            });
 
-            if(hasSender) {
+            if (hasSender) {
                 $(_this.settings.senderTarget).on('click', function () {
-                    if(hasValidationEngine) {
+                    if (hasValidationEngine) {
                         $form.validationEngine('attach');
                     }
                 });
             }
 
-            if(hasOnSubmit){
+            if (hasOnSubmit) {
                 $form.on('submit', function () {
-                    if(hasValidationEngine) {
+                    if (hasValidationEngine) {
                         if (!$form.validationEngine('validate')) {
                             return false;
                         }
@@ -194,8 +213,8 @@
          * @returns {boolean}
          * @private
          */
-        _configValidationEngine(){
-            if(!$.validationEngine)
+        _configValidationEngine() {
+            if (!$.validationEngine)
                 return false;
             $.validationEngine.defaults.promptPosition = 'inline';
             $.validationEngine.defaults.onFieldFailure = function (field) {
@@ -288,7 +307,7 @@
          * @private
          */
         _show() {
-            if(this.settings.debug === 1) {
+            if (this.settings.debug === 1) {
                 $.each(this.logs, function (i, logs) {
                     console[logs.type](pluginFnName + ': ' + logs.content + '.');
                 });
@@ -327,9 +346,9 @@
      * @returns {(undefined|function)} This plugin's instance.
      * @public
      */
-    $.fn[pluginFnName] = function(config) {
+    $.fn[pluginFnName] = function (config) {
         if (typeof config === 'object') {
-            return this.each(function(i, target) {
+            return this.each(function (i, target) {
                 new ManageFormTables(this, config);
             });
         } else {
@@ -360,16 +379,21 @@
         removeRowTarget: '.remove',
         addRowTarget: '.add-row',
         minRowsVisible: 1,
+        tableFormTitle: 'Formulario',
+        indexRowPattern: /#i/g,
         debug: 0,
         senderTarget: '.sender',
-        onSubmit: function (form) {},
-        onErrorRowsVisible(element, form) {},
-        events:[
-           {
-               targetName: 'edit',
-               onEventName: 'click',
-               onEvent: function () {}
-           }
+        onSubmit: function (form) {
+        },
+        onErrorRowsVisible(element, form) {
+        },
+        events: [
+            {
+                targetName: 'edit',
+                onEventName: 'click',
+                onEvent: function () {
+                }
+            }
         ]
     };
 
